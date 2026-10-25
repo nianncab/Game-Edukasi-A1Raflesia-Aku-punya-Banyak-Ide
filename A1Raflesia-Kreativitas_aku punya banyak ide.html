@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aku Punya Banyak Ide! - Game Edukasi PAUD/TK</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Fredoka & Quicksand for playful child-friendly typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .bouncy-btn {
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.15s;
+        }
+        .bouncy-btn:active {
+            transform: scale(0.92) translateY(4px);
+            box-shadow: 0 2px 0 0 rgba(0,0,0,0.2) !important;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes celebrate {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-celebrate {
+            animation: celebrate 0.5s ease-out forwards;
+        }
+
+        .canvas-shape {
+            cursor: move;
+            touch-action: none;
+        }
+
+        /* Glassmorphism panel styles */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(8px);
+            border: 4px solid #FFF;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center p-2 sm:p-4 text-slate-800 overflow-x-hidden">
+
+    <!-- Top Navigation Header -->
+    <header class="w-full max-w-4xl flex justify-between items-center bg-white/80 backdrop-blur rounded-3xl p-3 mb-3 shadow-md border-2 border-amber-300">
+        <div class="flex items-center space-x-3">
+            <button onclick="showMainMenu()" class="bouncy-btn bg-amber-400 hover:bg-amber-500 text-amber-950 p-2 sm:px-4 sm:py-2 rounded-2xl font-bold flex items-center space-x-2 shadow-[0_4px_0_#d97706]">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="hidden sm:inline text-lg">Menu Utama</span>
+            </button>
+            <div id="stars-display" class="flex items-center bg-yellow-100 px-3 py-1.5 rounded-2xl border border-yellow-300">
+                <i class="fa-solid fa-star text-yellow-500 text-2xl mr-1.5 animate-bounce"></i>
+                <span id="star-count" class="text-xl font-black text-amber-700">0</span>
+            </div>
+        </div>
+
+        <h1 id="game-title" class="text-lg sm:text-2xl font-black text-purple-700 tracking-wide text-center">
+            💡 Aku Punya Banyak Ide!
+        </h1>
+
+        <div class="flex items-center space-x-2">
+            <button id="tts-toggle" onclick="toggleAudio()" class="bouncy-btn bg-emerald-400 hover:bg-emerald-500 text-emerald-950 p-2 sm:px-3 sm:py-2 rounded-2xl font-bold flex items-center space-x-1 shadow-[0_4px_0_#059669]" title="Suara Narasi">
+                <i id="audio-icon" class="fa-solid fa-volume-high text-xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <main id="app-container" class="w-full max-w-4xl flex-1 flex flex-col justify-center items-center relative">
+        
+        <!-- ================= MAIN MENU ================= -->
+        <div id="view-menu" class="w-full glass-card rounded-3xl p-6 sm:p-8 text-center my-auto">
+            <div class="animate-float mb-4 inline-block">
+                <span class="text-6xl sm:text-8xl">💡🎨✨</span>
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-black text-purple-800 mb-2">
+                Aku Punya Banyak Ide!
+            </h2>
+            <p class="text-slate-600 font-bold mb-6 text-sm sm:text-base max-w-md mx-auto">
+                Subtopik: Banyak Ide | TK Kelompok B (5-6 Tahun)<br>
+                Ayo eksplorasi, pecahkan masalah, dan buat kreasimu sendiri!
+            </p>
+
+            <!-- Level Selector Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-w-2xl mx-auto mb-6">
+                <button onclick="startLevel(1)" class="bouncy-btn bg-gradient-to-r from-pink-400 to-rose-400 text-white p-4 rounded-2xl text-left border-2 border-white shadow-[0_6px_0_#be123c] flex items-center space-x-4">
+                    <span class="text-3xl bg-white/30 p-2 rounded-xl">📦</span>
+                    <div>
+                        <div class="text-xs uppercase font-black text-pink-100">Level 1</div>
+                        <div class="text-lg font-bold">Tebak Ideku!</div>
+                    </div>
+                </button>
+
+                <button onclick="startLevel(2)" class="bouncy-btn bg-gradient-to-r from-sky-400 to-blue-500 text-white p-4 rounded-2xl text-left border-2 border-white shadow-[0_6px_0_#1d4ed8] flex items-center space-x-4">
+                    <span class="text-3xl bg-white/30 p-2 rounded-xl">🥤</span>
+                    <div>
+                        <div class="text-xs uppercase font-black text-sky-100">Level 2</div>
+                        <div class="text-lg font-bold">Bisa Jadi Apa?</div>
+                    </div>
+                </button>
+
+                <button onclick="startLevel(3)" class="bouncy-btn bg-gradient-to-r from-amber-400 to-orange-500 text-white p-4 rounded-2xl text-left border-2 border-white shadow-[0_6px_0_#c2410c] flex items-center space-x-4">
+                    <span class="text-3xl bg-white/30 p-2 rounded-xl">🧩</span>
+                    <div>
+                        <div class="text-xs uppercase font-black text-amber-100">Level 3</div>
+                        <div class="text-lg font-bold">Pecahkan Masalah!</div>
+                    </div>
+                </button>
+
+                <button onclick="startLevel(4)" class="bouncy-btn bg-gradient-to-r from-emerald-400 to-teal-500 text-white p-4 rounded-2xl text-left border-2 border-white shadow-[0_6px_0_#0f766e] flex items-center space-x-4">
+                    <span class="text-3xl bg-white/30 p-2 rounded-xl">🎨</span>
+                    <div>
+                        <div class="text-xs uppercase font-black text-emerald-100">Level 4</div>
+                        <div class="text-lg font-bold">Ciptakan Karyamu!</div>
+                    </div>
+                </button>
+            </div>
+
+            <button onclick="startLevel(1)" class="bouncy-btn bg-yellow-400 hover:bg-yellow-300 text-amber-950 px-8 py-4 rounded-full text-2xl font-black shadow-[0_8px_0_#b45309] border-4 border-white inline-flex items-center space-x-3">
+                <i class="fa-solid fa-play"></i>
+                <span>Mulai Bermain!</span>
+            </button>
+        </div>
+
+        <!-- ================= LEVEL 1 ================= -->
+        <div id="view-level1" class="w-full glass-card rounded-3xl p-4 sm:p-6 text-center hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="bg-pink-100 text-pink-700 font-bold px-3 py-1 rounded-full text-xs sm:text-sm">
+                    Level 1: Tebak Ideku!
+                </span>
+                <button onclick="speakInstruction()" class="bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high"></i> <span>Dengar Instruksi</span>
+                </button>
+            </div>
+
+            <h2 id="l1-question" class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">
+                Lihat Kardus Bekas Ini! Apa saja yang bisa kita buat dengannya?
+            </h2>
+
+            <div class="bg-gradient-to-b from-amber-50 to-orange-100 rounded-2xl p-4 mb-4 border-2 border-amber-200 flex justify-center items-center min-h-[140px]">
+                <div id="l1-object-icon" class="text-7xl sm:text-8xl animate-float">📦</div>
+            </div>
+
+            <p class="text-slate-500 font-bold text-sm mb-3">Pilih SEMUA ide yang menurutmu bagus & masuk akal!</p>
+
+            <div id="l1-options" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                <!-- Options injected by JS -->
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="showMainMenu()" class="bouncy-btn bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                </button>
+                <button id="l1-next-btn" onclick="checkLevel1()" class="bouncy-btn bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#047857]">
+                    Lanjutkan <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL 2 ================= -->
+        <div id="view-level2" class="w-full glass-card rounded-3xl p-4 sm:p-6 text-center hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="bg-sky-100 text-sky-700 font-bold px-3 py-1 rounded-full text-xs sm:text-sm">
+                    Level 2: Benda Ini Bisa Jadi Apa?
+                </span>
+                <button onclick="speakInstruction()" class="bg-sky-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high"></i> <span>Dengar Instruksi</span>
+                </button>
+            </div>
+
+            <h2 id="l2-question" class="text-xl sm:text-2xl font-bold text-slate-800 mb-2">
+                Sedotan Plastik Bisa Jadi Apa Saja Ya?
+            </h2>
+            <p class="text-slate-600 text-sm mb-4">Ingat! Ada lebih dari satu ide keren yang benar!</p>
+
+            <div class="bg-gradient-to-b from-sky-50 to-blue-100 rounded-2xl p-4 mb-4 border-2 border-sky-200 flex justify-center items-center min-h-[130px]">
+                <div id="l2-object-icon" class="text-7xl animate-float">🥤</div>
+            </div>
+
+            <div id="l2-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <!-- Options injected by JS -->
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="startLevel(1)" class="bouncy-btn bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Level 1
+                </button>
+                <button id="l2-next-btn" onclick="checkLevel2()" class="bouncy-btn bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#047857]">
+                    Lanjutkan <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL 3 ================= -->
+        <div id="view-level3" class="w-full glass-card rounded-3xl p-4 sm:p-6 text-center hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="bg-amber-100 text-amber-800 font-bold px-3 py-1 rounded-full text-xs sm:text-sm">
+                    Level 3: Ayo Pecahkan Masalah!
+                </span>
+                <button onclick="speakInstruction()" class="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high"></i> <span>Dengar Instruksi</span>
+                </button>
+            </div>
+
+            <div id="l3-scenario-box" class="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200 mb-4 text-left flex items-center space-x-4">
+                <div id="l3-icon" class="text-5xl sm:text-6xl">🏰💥</div>
+                <div>
+                    <h3 id="l3-title" class="font-bold text-lg text-amber-900">Menara Balok Roboh!</h3>
+                    <p id="l3-desc" class="text-sm text-slate-700">Dino bersedih karena menara balok tingginya roboh tersenggol. Apa solusi kreatif yang bisa kita sarankan?</p>
+                </div>
+            </div>
+
+            <div id="l3-options" class="grid grid-cols-1 gap-3 mb-6">
+                <!-- Options injected by JS -->
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="startLevel(2)" class="bouncy-btn bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Level 2
+                </button>
+                <button id="l3-next-btn" onclick="nextLevel3Problem()" class="bouncy-btn bg-emerald-500 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#047857]">
+                    Lanjutkan <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL 4 ================= -->
+        <div id="view-level4" class="w-full glass-card rounded-3xl p-4 sm:p-6 text-center hidden">
+            <div class="flex justify-between items-center mb-2">
+                <span class="bg-emerald-100 text-emerald-800 font-bold px-3 py-1 rounded-full text-xs sm:text-sm">
+                    Level 4: Ciptakan Karyamu!
+                </span>
+                <button onclick="speakInstruction()" class="bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high"></i> <span>Dengar</span>
+                </button>
+            </div>
+
+            <p id="l4-instruction" class="text-sm font-bold text-slate-700 mb-2">
+                Geser (Drag) bentuk-bentuk di bawah ke dalam kanvas untuk membuat rumah, robot, atau kendaraan imajinasimu!
+            </p>
+
+            <!-- Creative Playground Area -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+                <!-- Palette -->
+                <div class="md:col-span-1 bg-slate-100 rounded-2xl p-2 border-2 border-slate-300 flex md:flex-col flex-wrap justify-center gap-2 max-h-[160px] md:max-h-[320px] overflow-y-auto">
+                    <div class="text-xs font-bold text-slate-500 w-full text-center">Tarik Bentuk Ini:</div>
+                    <button onclick="addShapeToCanvas('🔴', 'red')" class="bouncy-btn bg-red-100 p-2 rounded-xl text-3xl hover:bg-red-200">🔴</button>
+                    <button onclick="addShapeToCanvas('🟦', 'blue')" class="bouncy-btn bg-blue-100 p-2 rounded-xl text-3xl hover:bg-blue-200">🟦</button>
+                    <button onclick="addShapeToCanvas('🔺', 'yellow')" class="bouncy-btn bg-yellow-100 p-2 rounded-xl text-3xl hover:bg-yellow-200">🔺</button>
+                    <button onclick="addShapeToCanvas('⭐', 'gold')" class="bouncy-btn bg-amber-100 p-2 rounded-xl text-3xl hover:bg-amber-200">⭐</button>
+                    <button onclick="addShapeToCanvas('🚗', 'car')" class="bouncy-btn bg-emerald-100 p-2 rounded-xl text-3xl hover:bg-emerald-200">🚗</button>
+                    <button onclick="addShapeToCanvas('🤖', 'robot')" class="bouncy-btn bg-purple-100 p-2 rounded-xl text-3xl hover:bg-purple-200">🤖</button>
+                    <button onclick="addShapeToCanvas('🌳', 'tree')" class="bouncy-btn bg-green-100 p-2 rounded-xl text-3xl hover:bg-green-200">🌳</button>
+                    <button onclick="addShapeToCanvas('📦', 'box')" class="bouncy-btn bg-orange-100 p-2 rounded-xl text-3xl hover:bg-orange-200">📦</button>
+                </div>
+
+                <!-- Canvas Board -->
+                <div id="creative-canvas" class="md:col-span-3 bg-gradient-to-b from-sky-100 to-emerald-50 rounded-2xl border-4 border-dashed border-emerald-300 relative min-h-[260px] sm:min-h-[320px] overflow-hidden shadow-inner">
+                    <div id="canvas-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold text-center p-4 pointer-events-none">
+                        Klik / Ketuk item di kiri untuk menambahkannya ke kanvas ini!
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="clearCanvas()" class="bouncy-btn bg-rose-200 text-rose-800 px-3 py-2 rounded-xl font-bold text-xs sm:text-sm">
+                    <i class="fa-solid fa-trash"></i> Bersihkan
+                </button>
+                <button onclick="finishCreation()" class="bouncy-btn bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#047857]">
+                    Selesai & Ceritakan! <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= LEVEL 5 ================= -->
+        <div id="view-level5" class="w-full glass-card rounded-3xl p-4 sm:p-6 text-center hidden">
+            <div class="flex justify-between items-center mb-3">
+                <span class="bg-purple-100 text-purple-800 font-bold px-3 py-1 rounded-full text-xs sm:text-sm">
+                    Level 5: Ceritakan Idenya!
+                </span>
+                <button onclick="speakInstruction()" class="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-volume-high"></i> <span>Dengar Narasi</span>
+                </button>
+            </div>
+
+            <h2 class="text-xl sm:text-2xl font-bold text-purple-900 mb-2">
+                Wah, Karya Keren! Ayo Ceritakan Idenya!
+            </h2>
+            <p class="text-slate-600 text-sm mb-4">Lengkapi kalimat ide kreatifmu di bawah ini:</p>
+
+            <!-- Interactive Story Sentence Builder -->
+            <div class="bg-purple-50 p-4 sm:p-6 rounded-2xl border-2 border-purple-200 text-left space-y-4 mb-6">
+                
+                <!-- Line 1 -->
+                <div class="flex flex-wrap items-center gap-2 text-base sm:text-xl font-bold text-slate-800">
+                    <span>1. "Aku membuat</span>
+                    <select id="story-creation" onchange="updateStoryPreview()" class="bg-white border-2 border-purple-400 rounded-xl px-3 py-1 text-purple-700 font-black cursor-pointer shadow-sm">
+                        <option value="Rumah Impian">Rumah Impian 🏠</option>
+                        <option value="Robot Canggih">Robot Canggih 🤖</option>
+                        <option value="Mobil Masa Depan">Mobil Masa Depan 🏎️</option>
+                        <option value="Taman Bunga">Taman Bunga 🌸</option>
+                        <option value="Kapal Luar Angkasa">Kapal Luar Angkasa 🚀</option>
+                    </select>
+                    <span>."</span>
+                </div>
+
+                <!-- Line 2 -->
+                <div class="flex flex-wrap items-center gap-2 text-base sm:text-xl font-bold text-slate-800">
+                    <span>2. "Aku menggunakan</span>
+                    <select id="story-material" onchange="updateStoryPreview()" class="bg-white border-2 border-purple-400 rounded-xl px-3 py-1 text-purple-700 font-black cursor-pointer shadow-sm">
+                        <option value="kardus bekas dan balok">Kardus Bekas & Balok 📦</option>
+                        <option value="sedotan dan kertas warna">Sedotan & Kertas Warna 🥤</option>
+                        <option value="botol plastik bekas">Botol Plastik Bekas 🍾</option>
+                        <option value="bentuk-bentuk geometri">Bentuk Geometri 🔺🟦🔴</option>
+                    </select>
+                    <span>."</span>
+                </div>
+
+                <!-- Line 3 -->
+                <div class="flex flex-wrap items-center gap-2 text-base sm:text-xl font-bold text-slate-800">
+                    <span>3. "Ide kreatifku adalah</span>
+                    <select id="story-idea" onchange="updateStoryPreview()" class="bg-white border-2 border-purple-400 rounded-xl px-3 py-1 text-purple-700 font-black cursor-pointer shadow-sm">
+                        <option value="membuat tempat bermain yang menyenangkan">membuat tempat bermain baru 🎡</option>
+                        <option value="membantu merapikan mainan dengan mudah">membantu merapikan mainan 🧸</option>
+                        <option value="menyelamatkan lingkungan dengan daur ulang">mendaur ulang barang bekas ♻️</option>
+                        <option value="menciptakan alat transportasi imajinasi">menciptakan kendaraan unik 🛸</option>
+                    </select>
+                    <span>."</span>
+                </div>
+            </div>
+
+            <!-- Full Sentence Readout Box -->
+            <div class="bg-white p-4 rounded-2xl border-2 border-amber-300 shadow-sm mb-6 flex items-center justify-between">
+                <div class="text-left pr-2">
+                    <div class="text-xs font-bold text-amber-600 uppercase">Cerita Lengkapmu:</div>
+                    <p id="full-story-text" class="text-sm sm:text-base font-semibold text-slate-800 italic mt-1">
+                        "Aku membuat Rumah Impian. Aku menggunakan kardus bekas dan balok. Ide kreatifku adalah membuat tempat bermain yang menyenangkan."
+                    </p>
+                </div>
+                <button onclick="readFullStory()" class="bouncy-btn bg-amber-400 hover:bg-amber-500 text-amber-950 p-3 rounded-2xl shrink-0 font-bold flex flex-col items-center">
+                    <i class="fa-solid fa-volume-high text-2xl"></i>
+                    <span class="text-xs mt-1">Bacakan</span>
+                </button>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <button onclick="startLevel(4)" class="bouncy-btn bg-slate-300 text-slate-700 px-4 py-2 rounded-xl font-bold">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Level 4
+                </button>
+                <button onclick="finishGame()" class="bouncy-btn bg-yellow-400 hover:bg-yellow-300 text-amber-950 px-8 py-3 rounded-2xl font-black text-xl shadow-[0_6px_0_#d97706] border-2 border-white">
+                    ⭐ Selesai & Ambil Bintang! ⭐
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= CELEBRATION MODAL ================= -->
+        <div id="view-celebration" class="w-full glass-card rounded-3xl p-6 text-center hidden animate-celebrate">
+            <div class="text-7xl mb-3">🏆🎉🌟</div>
+            <h2 class="text-3xl sm:text-4xl font-black text-amber-600 mb-2">HEBAT SEHALI!</h2>
+            <p class="text-slate-700 font-bold text-lg mb-4">
+                Kamu Anak Kreatif yang Punya Banyak Ide!
+            </p>
+
+            <div class="bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-100 p-4 rounded-2xl border-2 border-amber-300 mb-6">
+                <div class="text-amber-800 font-bold text-sm">Bintang Prestasi Ide Kreatif:</div>
+                <div id="final-stars-count" class="text-5xl font-black text-amber-600 my-2">⭐ 15</div>
+                <p class="text-xs text-amber-700">"Semua ide yang masuk akal adalah ide yang hebat!"</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3">
+                <button onclick="showMainMenu()" class="bouncy-btn bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#581c87]">
+                    <i class="fa-solid fa-house mr-2"></i> Menu Utama
+                </button>
+                <button onclick="startLevel(1)" class="bouncy-btn bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-lg shadow-[0_4px_0_#047857]">
+                    <i class="fa-solid fa-rotate-right mr-2"></i> Main Lagi
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Feedback Toast Popup -->
+    <div id="feedback-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border-amber-300 animate-celebrate">
+            <div id="feedback-emoji" class="text-6xl mb-2">🌟</div>
+            <h3 id="feedback-title" class="text-2xl font-black text-purple-800 mb-2">Wah, Ide Bagus!</h3>
+            <p id="feedback-message" class="text-slate-600 font-bold mb-6 text-sm sm:text-base">
+                Kamu menemukan cara baru yang sangat kreatif!
+            </p>
+            <button onclick="closeFeedback()" class="bouncy-btn bg-amber-400 hover:bg-amber-500 text-amber-950 font-black px-6 py-3 rounded-2xl w-full text-lg shadow-[0_4px_0_#b45309]">
+                Lanjut Bermain! 🚀
+            </button>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-4xl text-center py-2 text-xs font-bold text-slate-600">
+        Game Edukasi PAUD/TK Kelompok B • Tema: Kebutuhanku • Subtopik: Banyak Ide
+    </footer>
+
+    <script>
+        // ================= GAME STATE VARIABLES =================
+        let currentStars = 0;
+        let audioEnabled = true;
+        let currentLevel = 0;
+
+        // Level 1 Data
+        const level1Data = {
+            question: "Lihat Kardus Bekas Ini! Apa saja yang bisa kita buat dengannya?",
+            object: "📦",
+            options: [
+                { id: 1, text: "Rumah Boneka 🏠", isCreative: true },
+                { id: 2, text: "Garasi Mobil 🚗", isCreative: true },
+                { id: 3, text: "Perahu / Kapal ⛵", isCreative: true }
+            ]
+        };
+        let selectedL1Options = [];
+
+        // Level 2 Data
+        const level2Data = {
+            question: "Sedotan Plastik Ini Bisa Kita Jadikan Apa Saja Ya?",
+            object: "🥤",
+            options: [
+                { id: 1, text: "Jembatan Mainan 🌉", isCreative: true, hint: "Bisa disusun jadi jembatan kuat!" },
+                { id: 2, text: "Suling / Seruling Musik 🎶", isCreative: true, hint: "Bisa ditiup jadi alat musik!" },
+                { id: 3, text: "Bingkai Foto Unik 🖼️", isCreative: true, hint: "Bisa dipotong untuk hiasan!" },
+                { id: 4, text: "Roda Mobil Asli 🛞", isCreative: false, hint: "Sedotan terlalu lembek untuk roda mobil asli, cari ide lain yuk!" }
+            ]
+        };
+        let selectedL2Options = [];
+
+        // Level 3 Data
+        const level3Problems = [
+            {
+                title: "Menara Balok Roboh!",
+                icon: "🏰💥",
+                desc: "Dino bersedih karena menara balok yang ia susun tinggi roboh tersenggol. Apa ide solusimu?",
+                options: [
+                    { text: "Membuat dasar menara yang lebih lebar & luas 🧱", correct: true, feedback: "Wah, ide bagus! Dasar yang lebar membuat menara tidak mudah roboh!" },
+                    { text: "Menangis dan meninggalkan mainan 😢", correct: false, feedback: "Ayo coba cari ide lain yang bisa menyelesaikan masalah!" },
+                    { text: "Bekerja sama dengan teman menyusun lagi 🤝", correct: true, feedback: "Hebat! Bekerja sama membuat pekerjaan cepat selesai!" }
+                ]
+            },
+            {
+                title: "Ingin Menyeberangkan Mobil Mainan!",
+                icon: "🚗🌊",
+                desc: "Ada sungai buatan di lantai. Mobil mainan ingin menyeberang. Bagaimana idemu?",
+                options: [
+                    { text: "Membuat jembatan dari penggaris atau balok 📐", correct: true, feedback: "Hebat! Penggaris bisa jadi jembatan penyeberangan yang keren!" },
+                    { text: "Membuat perahu pengangkut mobil dari kertas ⛵", correct: true, feedback: "Ide yang sangat imajinatif dan kreatif!" }
+                ]
+            }
+        ];
+        let currentL3Idx = 0;
+
+        // Sound Synthesis helper (Web Audio API) for sound effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration) {
+            if (!audioEnabled) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function playSuccessSound() {
+            playTone(523.25, 'sine', 0.15); // C5
+            setTimeout(() => playTone(659.25, 'sine', 0.15), 100); // E5
+            setTimeout(() => playTone(783.99, 'sine', 0.3), 200); // G5
+        }
+
+        function playClickSound() {
+            playTone(400, 'triangle', 0.05);
+        }
+
+        // Speech Synthesis (Narrator)
+        function speakText(text) {
+            if (!audioEnabled) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID';
+                utterance.rate = 0.9; // Slower for children
+                utterance.pitch = 1.1; // Friendly higher pitch
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btnIcon = document.getElementById('audio-icon');
+            if (audioEnabled) {
+                btnIcon.className = "fa-solid fa-volume-high text-xl";
+                speakText("Suara aktif");
+            } else {
+                btnIcon.className = "fa-solid fa-volume-xmark text-xl";
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function addStars(num) {
+            currentStars += num;
+            document.getElementById('star-count').innerText = currentStars;
+            playSuccessSound();
+        }
+
+        // Navigation
+        function hideAllViews() {
+            const views = ['view-menu', 'view-level1', 'view-level2', 'view-level3', 'view-level4', 'view-level5', 'view-celebration'];
+            views.forEach(v => document.getElementById(v).classList.add('hidden'));
+        }
+
+        function showMainMenu() {
+            playClickSound();
+            hideAllViews();
+            document.getElementById('view-menu').classList.remove('hidden');
+            speakText("Selamat datang di game Aku Punya Banyak Ide! Pilih level yang ingin kamu mainkan.");
+        }
+
+        function startLevel(lvlNum) {
+            playClickSound();
+            hideAllViews();
+            currentLevel = lvlNum;
+
+            if (lvlNum === 1) {
+                document.getElementById('view-level1').classList.remove('hidden');
+                initLevel1();
+            } else if (lvlNum === 2) {
+                document.getElementById('view-level2').classList.remove('hidden');
+                initLevel2();
+            } else if (lvlNum === 3) {
+                currentL3Idx = 0;
+                document.getElementById('view-level3').classList.remove('hidden');
+                initLevel3();
+            } else if (lvlNum === 4) {
+                document.getElementById('view-level4').classList.remove('hidden');
+                initLevel4();
+            } else if (lvlNum === 5) {
+                document.getElementById('view-level5').classList.remove('hidden');
+                initLevel5();
+            }
+        }
+
+        function speakInstruction() {
+            if (currentLevel === 1) {
+                speakText(level1Data.question + " Pilih semua ide yang menurutmu bagus!");
+            } else if (currentLevel === 2) {
+                speakText(level2Data.question);
+            } else if (currentLevel === 3) {
+                const prob = level3Problems[currentL3Idx];
+                speakText(prob.title + ". " + prob.desc);
+            } else if (currentLevel === 4) {
+                speakText("Level 4. Sentuh atau geser bentuk ke dalam kanvas untuk menciptakan kreasimu!");
+            } else if (currentLevel === 5) {
+                speakText("Level 5. Ceritakan idemu! Lengkapi kalimat cerita lalu tekan tombol bacakan.");
+            }
+        }
+
+        // ================= LEVEL 1 LOGIC =================
+        function initLevel1() {
+            selectedL1Options = [];
+            document.getElementById('l1-question').innerText = level1Data.question;
+            document.getElementById('l1-object-icon').innerText = level1Data.object;
+
+            const optsContainer = document.getElementById('l1-options');
+            optsContainer.innerHTML = '';
+
+            level1Data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bouncy-btn bg-white border-4 border-pink-200 hover:border-pink-400 p-4 rounded-2xl text-base sm:text-lg font-bold text-slate-800 shadow-sm flex items-center justify-center space-x-2";
+                btn.id = `l1-opt-${opt.id}`;
+                btn.innerHTML = `<span>${opt.text}</span>`;
+                btn.onclick = () => toggleL1Option(opt.id);
+                optsContainer.appendChild(btn);
+            });
+
+            speakInstruction();
+        }
+
+        function toggleL1Option(id) {
+            playClickSound();
+            const btn = document.getElementById(`l1-opt-${id}`);
+            const idx = selectedL1Options.indexOf(id);
+
+            if (idx > -1) {
+                selectedL1Options.splice(idx, 1);
+                btn.classList.remove('bg-pink-200', 'border-pink-500', 'text-pink-900');
+                btn.classList.add('bg-white');
+            } else {
+                selectedL1Options.push(id);
+                btn.classList.remove('bg-white');
+                btn.classList.add('bg-pink-200', 'border-pink-500', 'text-pink-900');
+            }
+        }
+
+        function checkLevel1() {
+            if (selectedL1Options.length === 0) {
+                showFeedback("Ayo Coba!", "Pilih minimal satu ide menarik menurutmu ya!", "💡");
+                speakText("Pilih minimal satu ide menarik menurutmu ya!");
+                return;
+            }
+
+            addStars(3);
+            showFeedback("Wah, Ide Luar Biasa!", "Hebat! Kardus memang bisa jadi rumah boneka, garasi, maupun kapal. Kamu punya banyak ide!", "⭐");
+            speakText("Wah, ide luar biasa! Kardus memang bisa jadi banyak benda keren!");
+            
+            setTimeout(() => {
+                closeFeedback();
+                startLevel(2);
+            }, 2500);
+        }
+
+        // ================= LEVEL 2 LOGIC =================
+        function initLevel2() {
+            selectedL2Options = [];
+            document.getElementById('l2-question').innerText = level2Data.question;
+            document.getElementById('l2-object-icon').innerText = level2Data.object;
+
+            const optsContainer = document.getElementById('l2-options');
+            optsContainer.innerHTML = '';
+
+            level2Data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "bouncy-btn bg-white border-4 border-sky-200 hover:border-sky-400 p-4 rounded-2xl text-slate-800 font-bold text-base sm:text-lg flex flex-col items-center justify-center shadow-sm";
+                btn.id = `l2-opt-${opt.id}`;
+                btn.innerHTML = `
+                    <span class="text-lg">${opt.text}</span>
+                    <span class="text-xs font-normal text-slate-500 mt-1">${opt.hint}</span>
+                `;
+                btn.onclick = () => selectL2Option(opt);
+                optsContainer.appendChild(btn);
+            });
+
+            speakInstruction();
+        }
+
+        function selectL2Option(opt) {
+            playClickSound();
+            if (opt.isCreative) {
+                addStars(2);
+                showFeedback("Ide Sangat Kreatif!", `Ya! Sedotan bisa jadi ${opt.text}. Kamu pintar mencari kegunaan benda!`, "💡");
+                speakText(`Ya! Sedotan bisa jadi ${opt.text}. Hore!`);
+            } else {
+                showFeedback("Ayo Berpikir Lagi!", opt.hint, "🤔");
+                speakText(opt.hint);
+            }
+        }
+
+        function checkLevel2() {
+            startLevel(3);
+        }
+
+        // ================= LEVEL 3 LOGIC =================
+        function initLevel3() {
+            const prob = level3Problems[currentL3Idx];
+            document.getElementById('l3-title').innerText = prob.title;
+            document.getElementById('l3-desc').innerText = prob.desc;
+            document.getElementById('l3-icon').innerText = prob.icon;
+
+            const optsContainer = document.getElementById('l3-options');
+            optsContainer.innerHTML = '';
+
+            prob.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "bouncy-btn bg-white border-4 border-amber-200 hover:border-amber-400 p-4 rounded-2xl text-slate-800 font-bold text-left text-base sm:text-lg shadow-sm flex items-center space-x-3";
+                btn.innerHTML = `
+                    <span class="bg-amber-100 text-amber-800 rounded-full w-8 h-8 flex items-center justify-center shrink-0 font-black">${idx + 1}</span>
+                    <span>${opt.text}</span>
+                `;
+                btn.onclick = () => handleL3Choice(opt);
+                optsContainer.appendChild(btn);
+            });
+
+            speakInstruction();
+        }
+
+        function handleL3Choice(opt) {
+            playClickSound();
+            if (opt.correct) {
+                addStars(3);
+                showFeedback("Solusi Hebat!", opt.feedback, "🌟");
+                speakText(opt.feedback);
+            } else {
+                showFeedback("Coba Cara Lain!", opt.feedback, "💡");
+                speakText(opt.feedback);
+            }
+        }
+
+        function nextLevel3Problem() {
+            currentL3Idx++;
+            if (currentL3Idx < level3Problems.length) {
+                initLevel3();
+            } else {
+                startLevel(4);
+            }
+        }
+
+        // ================= LEVEL 4 LOGIC (Canvas) =================
+        function initLevel4() {
+            speakInstruction();
+        }
+
+        function addShapeToCanvas(symbol, type) {
+            playClickSound();
+            const canvas = document.getElementById('creative-canvas');
+            const placeholder = document.getElementById('canvas-placeholder');
+            if (placeholder) placeholder.style.display = 'none';
+
+            const elem = document.createElement('div');
+            elem.className = 'canvas-shape absolute text-4xl sm:text-5xl select-none cursor-grab active:cursor-grabbing p-1 hover:scale-110 transition-transform';
+            elem.innerText = symbol;
+
+            // Random initial position inside canvas
+            const maxX = canvas.clientWidth - 60;
+            const maxY = canvas.clientHeight - 60;
+            const randomX = Math.max(10, Math.floor(Math.random() * maxX));
+            const randomY = Math.max(10, Math.floor(Math.random() * maxY));
+
+            elem.style.left = randomX + 'px';
+            elem.style.top = randomY + 'px';
+
+            // Drag & Drop Handling (Mouse & Touch)
+            makeElementDraggable(elem, canvas);
+
+            canvas.appendChild(elem);
+        }
+
+        function makeElementDraggable(elmnt, container) {
+            let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+            elmnt.onmousedown = dragMouseDown;
+            elmnt.ontouchstart = dragTouchStart;
+
+            function dragMouseDown(e) {
+                e.preventDefault();
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+
+                // Boundary bounds
+                newTop = Math.max(0, Math.min(container.clientHeight - 50, newTop));
+                newLeft = Math.max(0, Math.min(container.clientWidth - 50, newLeft));
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+
+            function dragTouchStart(e) {
+                const touch = e.touches[0];
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+                document.ontouchend = closeTouchDrag;
+                document.ontouchmove = touchDrag;
+            }
+
+            function touchDrag(e) {
+                const touch = e.touches[0];
+                pos1 = pos3 - touch.clientX;
+                pos2 = pos4 - touch.clientY;
+                pos3 = touch.clientX;
+                pos4 = touch.clientY;
+
+                let newTop = elmnt.offsetTop - pos2;
+                let newLeft = elmnt.offsetLeft - pos1;
+
+                newTop = Math.max(0, Math.min(container.clientHeight - 50, newTop));
+                newLeft = Math.max(0, Math.min(container.clientWidth - 50, newLeft));
+
+                elmnt.style.top = newTop + "px";
+                elmnt.style.left = newLeft + "px";
+            }
+
+            function closeTouchDrag() {
+                document.ontouchend = null;
+                document.ontouchmove = null;
+            }
+        }
+
+        function clearCanvas() {
+            playClickSound();
+            const canvas = document.getElementById('creative-canvas');
+            canvas.innerHTML = `
+                <div id="canvas-placeholder" class="absolute inset-0 flex items-center justify-center text-slate-400 font-bold text-center p-4 pointer-events-none">
+                    Klik / Ketuk item di kiri untuk menambahkannya ke kanvas ini!
+                </div>
+            `;
+        }
+
+        function finishCreation() {
+            addStars(4);
+            showFeedback("Karya Kreatif Luar Biasa!", "Wah, imajinasimu sungguh indah! Sekarang mari ceritakan karya hebatmu ini!", "🎨");
+            speakText("Karya kreatif luar biasa! Ayo ceritakan idemu!");
+
+            setTimeout(() => {
+                closeFeedback();
+                startLevel(5);
+            }, 2000);
+        }
+
+        // ================= LEVEL 5 LOGIC =================
+        function initLevel5() {
+            updateStoryPreview();
+            speakInstruction();
+        }
+
+        function updateStoryPreview() {
+            const creation = document.getElementById('story-creation').value;
+            const material = document.getElementById('story-material').value;
+            const idea = document.getElementById('story-idea').value;
+
+            const fullText = `Aku membuat ${creation}. Aku menggunakan ${material}. Ide kreatifku adalah ${idea}.`;
+            document.getElementById('full-story-text').innerText = `"${fullText}"`;
+        }
+
+        function readFullStory() {
+            playClickSound();
+            const text = document.getElementById('full-story-text').innerText;
+            speakText(text);
+        }
+
+        function finishGame() {
+            addStars(5);
+            hideAllViews();
+            document.getElementById('final-stars-count').innerText = `⭐ ${currentStars}`;
+            document.getElementById('view-celebration').classList.remove('hidden');
+            speakText("Hebat sekali! Kamu adalah anak kreatif yang punya banyak ide!");
+            playSuccessSound();
+        }
+
+        // ================= FEEDBACK MODAL LOGIC =================
+        function showFeedback(title, message, emoji) {
+            document.getElementById('feedback-title').innerText = title;
+            document.getElementById('feedback-message').innerText = message;
+            document.getElementById('feedback-emoji').innerText = emoji || "🌟";
+            document.getElementById('feedback-modal').classList.remove('hidden');
+        }
+
+        function closeFeedback() {
+            playClickSound();
+            document.getElementById('feedback-modal').classList.add('hidden');
+        }
+
+        // Start app on load
+        window.onload = () => {
+            showMainMenu();
+        };
+    </script>
+</body>
+</html>
